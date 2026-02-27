@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>超凡账本</title>
+
+    <!-- Bootstrap core CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+
+    {% block style %} {# 自定义css #}
+    {% endblock %}
+  </head>
+  <body>
+    
+    {% include 'part/header.html' %} {# 引入导航栏部分 #}
+    <div class="container-fluid">
+      <div class="row">
+        {% include 'part/sidebar.html' %} {# 引入侧边栏 #}
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+           {% block content %}
+                <h1>主体内容</h1>
+           {% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <script src='{% static 'js/jquery.slim.min.js'%}'></script>
+    <script src='{% static 'js/bootstrap.bundle.min.js'%}'></script>
+    {% block js%}
+    {% endblock %}
+  </body>
+</html>
