@@ -1,0 +1,38 @@
+<div class="d-flex justify-content-center mt-4">
+    <ul class="pagination">
+        {% if not expenses.has_previous %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#">上一页</a>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ expenses.previous_page_number }}&search={{ keyword }}">上一页</a>
+        </li>
+        {% endif %}
+        {# 页码 #}
+        {% for page in expenses.paginator.page_range %}
+        {% if page >= expenses.number|add:'-3' and page <= expenses.number|add:'3' %}
+            {# 只显示当前页前后3页的页码 #}
+            {% if page == expenses.number %}
+            <li class="page-item active">
+                <a class="page-link" href="?page={{ page }}&search={{ keyword }}">{{ page }}</a>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page }}&search={{ keyword }}">{{ page }}</a>
+            </li>
+            {% endif %}
+        {% endif %}
+        {% endfor %}
+
+        {% if not expenses.has_next %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#">下一页</a>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ expenses.next_page_number }}&search={{ keyword }}">下一页</a>
+        </li>
+        {% endif %}
+    </ul>
+</div>

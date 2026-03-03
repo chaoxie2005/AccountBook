@@ -1,16 +1,18 @@
 import json
 from django.conf import settings
 from threading import Thread
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login as login_auth, logout as logout_auth
 from email_validator import validate_email as ValidateEmail, EmailNotValidError, EmailSyntaxError, EmailUndeliverableError
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt # 这个库可以禁用csrf保护机制，方便我们在前端通过ajax进行异步请求
 from django.contrib import messages
-from django.core.mail import BadHeaderError, send_mail
+from django.core.mail import send_mail
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.tokens import default_token_generator # django内置的生成token
 
 def register(request):
     """注册视图"""
@@ -163,3 +165,68 @@ def validate_email(request):
         })
 
 
+def forget_password(request):
+    """忘记密码"""
+    if request.method == 'GET':
+        return render(request, 'authentication/forgetpassword.html')
+    elif request.method == 'POST':
+        email = request.POST.get('email')
+        if not User.objects.filter(email=email).exists():
+            context = {
+                'error': '邮箱不存在',
+                'email': email
+            }
+            return render(request, "authentication/forgetpassword.html", context)
+
+        user = User.objects.get(email=email)
+        current_site = get_current_site(request) # 动态获取域名
+        token = default_token_generator.make_token(user)
+
+        link = 'http://' + current_site.domain + resolve_url('authentication:reset_password', user.pk, token)
+
+        content = f"""
+            请点击下方链接，找回密码：
+            {link}
+            """
+        t = Thread(
+            target=send_mail,
+            args=[
+                "找回密码[鱿鱼账本]",  # 邮件主题
+                content,  # 邮件内容
+                settings.EMAIL_HOST_USER,  # 发件人
+                [user.email],  # 收件人
+                False,
+            ],
+        )
+        t.start()
+        return HttpResponse("请查收邮件，重置密码")
+
+
+def reset_password(request, pk, token):
+    if request.method == 'GET':
+        user = get_object_or_404(User, pk=pk)
+        if not default_token_generator.check_token(user, token):
+            return HttpResponseBadRequest("Invalid Token")
+
+        messages.info(request, f'{user.username}，请设置你的新密码')
+        return render(request, 'authentication/reset_password.html')
+    elif request.method == 'POST':
+        user = get_object_or_404(User, pk=pk)
+        if not default_token_generator.check_token(user, token):
+            return HttpResponseBadRequest("Invalid Token")
+
+        password = request.POST.get('password')
+        re_password = request.POST.get('re_password')
+        if password and re_password and password != re_password:
+            messages.error(request, '两次密码输入不一致')
+            return render(request, "authentication/reset_password.html")
+
+        if len(password) < 6:
+            messages.error(request, '密码不能少于6位')
+            return render(request, "authentication/reset_password.html")
+
+        else:
+            user.set_password(password)
+            user.save()
+            messages.success(request, '密码修改成功，请使用新密码进行登录！')
+            return redirect(to='authentication:login')
