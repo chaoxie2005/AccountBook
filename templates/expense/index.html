@@ -1,4 +1,5 @@
 {% extends 'superclass/base.html' %}
+{% load static %}
 
 {% block content %}
   {# 面包屑 #}
@@ -28,9 +29,9 @@
       <div class="btn-group" role="group">
         <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">导出</button>
         <div class="dropdown-menu">
-          <a class="dropdown-item" href="#">CSV</a>
-          <a class="dropdown-item" href="#">Excel</a>
-          <a class="dropdown-item" href="#">PDF</a>
+          <a class="dropdown-item" href="{% url 'download_csv' %}">CSV</a>
+          <a class="dropdown-item" href="{% url 'download_excel' %}">Excel</a>
+          <a class="dropdown-item" href="{% url 'download_pdf' %}">PDF</a>
         </div>
       </div>
     </div>
@@ -45,7 +46,6 @@
     </div>
   </div>
 
-  {% include 'part/messages.html' %}
   {# 显示支出记录表格 #}
   <div class="row mt-3"></div>
   <div class="col-12">
@@ -67,7 +67,7 @@
             <td>{{ expense.date|date:'Y-m-d' }}</td>
             <td>{{ expense.description }}</td>
             <td>
-              <a href="#" class="btn btn-sm btn-secondary">编辑</a>
+              <a href="{% url 'edit_expense' expense.id %}" class="btn btn-sm btn-secondary">编辑</a>
               <button class="btn btn-danger btn-sm deleteBtn" expenseID="{{ expense.id }}">删除</button>
             </td>
           </tr>
@@ -78,4 +78,22 @@
 
   {# 分页导航 #}
   {% include 'part/paginator.html' %}
+
+  {# echarts展示区 #}
+  <div class="row mt-3">
+    <div class="col-md-6">
+      {# 为ECharts 准备一个定义了的宽高的 DOM，ECharts 会在这个 DOM 上绘制图表 #}
+      <div id="categoryStats" style="width: 100%;height: 400px;"></div>
+    </div>
+    <div class="col-md-6">
+      {# 为ECharts 准备一个定义了的宽高的 DOM，ECharts 会在这个 DOM 上绘制图表 #}
+      <div id="dateStats" style="width: 100%;height: 400px;"></div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script src="{% static 'js/expense/delete_expense.js' %}"></script>
+  <script src="{% static 'js/echarts.min.js' %}"></script>
+  <script src="{% static 'js/expense/index_stats.js' %}"></script>
 {% endblock %}

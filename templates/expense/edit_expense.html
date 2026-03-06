@@ -1,0 +1,60 @@
+{% extends 'superclass/base.html' %}
+
+{% block content %}
+  <div class="container mt-3">
+    {# 面包屑 #}
+    <div class="row mt-3">
+      <div class="col-12">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a href="{% url 'expense' %}">首页</a>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="{% url 'expense' %}">支出</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">编辑支出</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-body">
+            <form action="{% url 'edit_expense' expense.id %}" method="post">
+              {% csrf_token %}
+              <div class="form-group">
+                <label for="amountField" class="form-label">金额</label>
+                <input type="number" value="{% if values.amount %}{{ values.amount }}{% else %}0{% endif %}" class="form-control" name="amount" id="amountField" />
+              </div>
+              <div class="form-group">
+                <label for="categoryField" class="form-label">类型</label>
+                <select class="form-control" name="category" id="categoryField">
+                  <option value="" name="category">请选择类型</option>
+                  {% for item in categories %}
+                    <option value="{{ item.name }}" {% if item.name == values.category %}selected{% endif %}>{{ item.name }}·</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="descriptionField" class="form-label">描述</label>
+                <input type="text" value="{% if values.description %}{{ values.description }}{% else %}无{% endif %}" class="form-control" name="description" id="descriptionField" />
+              </div>
+              <div class="form-group">
+                <label for="dateField" class="form-label">日期</label>
+                <input type="date"
+                  class="form-control"
+                  name="date"
+                  id="dateField"
+                  value="{{ values.date|date:'Y-m-d' }}" />
+              </div>
+              <input type="submit" value="保存" class="btn btn-primary mt-2" />
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
