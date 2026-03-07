@@ -1,9 +1,60 @@
+<style>
+    .user-profile-area {
+        /* 为整个用户区域添加过渡效果，使其在内容变化时更平滑 */
+        display: flex;
+        align-items: center;
+    }
+
+    .header-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+        transition: all 0.3s cubic-bezier(.25,.8,.25,1); /* 使用更平滑的动画曲线 */
+    }
+    .user-profile-area a:hover .header-avatar {
+         /* 悬停时增加阴影并轻微上移，产生“浮起”效果 */
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 0 0 2px rgba(255, 255, 255, 0.6);
+    }
+
+    .username-link {
+        color: #e9ecef;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        /* 为文字添加轻微阴影，增加在深色背景下的可读性 */
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+ 
+    .username-link:hover {
+        color: #fff; /* 悬停时颜色变亮 */
+        text-decoration: none;
+    }
+ 
+    .logout-link {
+        color: #adb5bd;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2
+    }
+ 
+    .logout-link:hover {
+        color: #f8f9fa;
+        text-decoration: none;
+    }
+</style>
+
 <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
   <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">超凡账本</a>
   <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
   <ul class="navbar-nav px-3">
-    <li class="nav-item text-nowrap">
-      <a class="nav-link" href="{% url 'authentication:logout' %}">退出</a>
-    </li>
+    {# 用户信息和退出按钮 #}
+    <div class="d-flex align-items-center px-3 user-profile-area">
+      <a href="#" class="mr-2"><img class="header-avatar" src="/media/{{ request.user.userinfo.avatar }}" alt="头像" /></a>
+      <a href="#" class="username-link mr-3">{{ request.user.username }}</a>
+      <a class="logout-link" href="{% url 'authentication:logout' %}">退出</a>
+    </div>
   </ul>
 </nav>

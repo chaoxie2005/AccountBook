@@ -20,7 +20,8 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import default_token_generator  # django内置的生成token
-
+from .models import UserInfo
+from django.http import FileResponse
 
 def register(request):
     """注册视图"""
@@ -245,6 +246,7 @@ def reset_password(request, pk, token):
             return redirect(to="authentication:login")
 
 
+@login_required(login_url='authentication:login')
 def change_password(request):
     if request.method == 'GET':
         return render(request, 'authentication/change_password.html')
@@ -253,4 +255,50 @@ def change_password(request):
         old_password = request.POST.get("old-password")
         new_password = request.POST.get("new-password")
         re_password = request.POST.get("re-password")
-        
+
+        if old_password == new_password:
+            messages.error(request, '旧密码不能与新密码相同！')
+            return render(request, "authentication/change_password.html")
+
+        if not request.user.check_password(old_password):
+            messages.error(request, '旧密码错误！')
+            return render(request, "authentication/change_password.html")
+
+        if len(new_password) < 6:
+            messages.error(request, '密码不能少于6位')
+            return render(request, "authentication/change_password.html")
+
+        if new_password and re_password and new_password != re_password:
+            messages.error(request, '两次密码输入不一致！')
+            return render(request, "authentication/change_password.html")
+
+        request.user.set_password(new_password)
+        request.user.save()
+        messages.success(request, '密码修改成功，请重新登录')
+        return redirect(to='authentication:login')
+
+
+@login_required(login_url="authentication:login")
+def upload_avatar(request):
+    if request.method == 'GET':
+        return render(request, 'authentication/upload_avatar.html')
+
+    elif request.method == 'POST':
+        UserInfo.objects.update_or_create(
+            user=request.user, defaults={"avatar": request.FILES.get("avatar")}
+        )
+        messages.success(request, "头像上传成功")
+        return render(request, "authentication/upload_avatar.html")
+
+from .utils import generate_verify_code
+
+
+def captcha(request):
+    verify_code, buff = generate_verify_code()  # 生成验证码图片和验证码字符串
+    request.session["verify_code"] = (
+        verify_code.lower()
+    )  # 将验证码字符串存入session，方便 后续校验
+    return FileResponse(
+        buff, filename="verify.gif", headers={"Content-Type": "image/gif"}
+    )
+    

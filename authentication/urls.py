@@ -13,8 +13,20 @@ urlpatterns = [
     path(
         "validate_email/", views.validate_email, name="validate_email"
     ),  # 实时验证邮箱
-    path('verify_account/<str:username>/', views.verify_account, name='verify_account'), # 激活账号
-    path('forget_password/', views.forget_password, name='forget_password'), # 进入到忘记密码界面
-    path('reset_password/<int:pk>/<str:token>', views.reset_password, name='reset_password'), # 真正重置密码的逻辑
-    path('change_password/', views.change_password, name='change_password'), # 修改密码路由
+    path(
+        "verify_account/<str:username>/", views.verify_account, name="verify_account"
+    ),  # 激活账号
+    path(
+        "forget_password/", views.forget_password, name="forget_password"
+    ),  # 进入到忘记密码界面
+    path(
+        "reset_password/<int:pk>/<str:token>",
+        views.reset_password,
+        name="reset_password",
+    ),  # 真正重置密码的逻辑
+    path(
+        "change_password/", views.change_password, name="change_password"
+    ),  # 修改密码路由
+    path("upload_avatar/", views.upload_avatar, name="upload_avatar"),  # 上传头像链接
+    path("captcha/", views.captcha, name='captcha'), # 验证码
 ]

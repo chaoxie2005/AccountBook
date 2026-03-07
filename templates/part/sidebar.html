@@ -37,7 +37,7 @@
         <a class="nav-link {% if request.resolver_match.url_name == 'change_password' %}active{% endif %}" href="{% url 'authentication:change_password' %}">修改密码</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link {% if request.resolver_match.url_name == 'upload_avatar' %}active{% endif %}" href="#">上传头像</a>
+        <a class="nav-link {% if request.resolver_match.url_name == 'upload_avatar' %}active{% endif %}" href="{% url 'authentication:upload_avatar' %}">上传头像</a>
       </li>
     </ul>
   </div>
