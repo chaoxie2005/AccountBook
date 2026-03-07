@@ -67,9 +67,10 @@ def register(request):
 def login(request):
     """登录视图"""
     if request.method == "GET":
-        return render(request, "authentication/login.html")
+        form = LoginForm(request=request)
+        return render(request, "authentication/login.html", {"form": form})
     elif request.method == "POST":
-        form = LoginForm(request.POST)
+        form = LoginForm(request.POST, request=request)
         if form.is_valid():
             login_auth(request, form.user)
             messages.success(request, f"欢迎回来, {form.user.username}!")
@@ -301,4 +302,3 @@ def captcha(request):
     return FileResponse(
         buff, filename="verify.gif", headers={"Content-Type": "image/gif"}
     )
-    

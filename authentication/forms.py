@@ -66,14 +66,35 @@ class LoginForm(forms.Form):
         },
     )
 
+    captcha = forms.CharField(
+        max_length=4,
+        min_length=4,
+        error_messages={
+            "min_length": "验证码不能少于4位",
+            "max_length": "验证码不能大于4位",
+            "required": "验证码不能为空",
+        },
+    )
+
     def clean(self):
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
 
         if username and password:
-           self.user = authenticate(username=username, password=password)
-           if self.user is None:
-               raise forms.ValidationError(
+            self.user = authenticate(username=username, password=password)
+            if self.user is None:
+                raise forms.ValidationError(
                    '密码或账号错误，请重试！', code='invalid_login'
                ) 
         return self.cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super(LoginForm, self).__init__(*args, **kwargs)
+
+    def clean_captcha(self):
+        captcha = self.cleaned_data.get("captcha")
+        verify_code = self.request.session.get("verify_code")
+        if not verify_code or captcha.lower() != verify_code:
+            raise forms.ValidationError("验证码错误")
+        return captcha
