@@ -1,0 +1,62 @@
+# 版本号
+version: '3.8'
+# 服务定义 - 相当于"要启动哪些容器"
+services:
+  accountbook:
+    # 构建上下文，. 表示当前目录
+    build: . # 用当前目录的 Dockerfile 构建
+    # 映射端口 - 将主机端口映射到容器端口
+    ports:
+      - 5000:5000
+    # 挂载卷 - 将主机目录挂载到容器目录
+    volumes:
+      - ./:/app
+      - ./media:/app/media
+      - ./static:/app/static
+      - staticfiles:/app/staticfiles
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=mysql://user:password@mysql:3306/myaccountbookdb
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS}
+    depends_on:
+      - mysql
+  # 服务2：Nginx 反向代理
+  nginx:
+    build: ./nginx # 用 ./nginx/Dockerfile 构建
+    # 端口映射
+    ports:
+      - 80:80
+    # 挂载卷 - 将主机目录挂载到容器目录
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./nginx/html:/usr/share/nginx/html # 挂载静态文件目录
+      - ./nginx/logs:/var/log/nginx
+      - staticfiles:/app/staticfiles
+      - ./media:/app/media # 挂载媒体文件目录
+    # 依赖关系 - 确保 Nginx 启动时 accountbook 服务已启动
+    depends_on:
+      - accountbook # 确保 accountbook 服务已启动
+  # 服务3：Mysql 数据库
+  mysql:
+    image: registry.hub.docker.com/library/mysql:5.7
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=myaccountbookdb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+
+# 数据卷定义 - 用于持久化存储
+volumes:
+  media:
+  static:
+  staticfiles:
+  nginx:
+  mysql:
+  db:
