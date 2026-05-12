@@ -1,38 +1,139 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>超凡账本</title>
 
-    <!-- Bootstrap core CSS -->
-    {% load static %}
-    <link rel="shortcut icon" href="{% static 'img/favicon.png' %}" type="image/x-icon">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>超凡账本</title>
 
-    {% block style %} {# 自定义css #}
-    {% endblock %}
-  </head>
-  <body>
-    
-    {% include 'part/header.html' %} {# 引入导航栏部分 #}
-    <div class="container-fluid">
-      <div class="row">
-        {% include 'part/sidebar.html' %} {# 引入侧边栏 #}
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-           {% block content %}
-                <h1>主体内容</h1>
-           {% endblock %}
-        </main>
+  <!-- Bootstrap core CSS -->
+  {% load static %}
+  <link rel="shortcut icon" href="{% static 'img/favicon.png' %}" type="image/x-icon">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+  <style>
+    :root {
+      --primary-color: #4e73df;
+      --secondary-color: #858796;
+      --success-color: #1cc88a;
+      --info-color: #36b9cc;
+      --warning-color: #f6c23e;
+      --danger-color: #e74a3b;
+      --light-color: #f8f9fc;
+      --dark-color: #5a5c69;
+      --sidebar-bg: #4e73df;
+      --sidebar-dark-bg: #224abe;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7fc;
+      color: #5a5c69;
+    }
+
+    .card {
+      border: none;
+      border-radius: 0.75rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+    }
+
+    .btn {
+      border-radius: 0.35rem;
+      font-weight: 600;
+      padding: 0.5rem 1.25rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+    }
+
+    .breadcrumb {
+      background-color: transparent;
+      padding: 0;
+      margin-bottom: 1.5rem;
+    }
+
+    .table {
+      background-color: #fff;
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+
+    .table thead th {
+      background-color: #f8f9fc;
+      border-bottom: 2px solid #e3e6f0;
+      color: #4e73df;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+  </style>
+  {% block style %} {# 自定义css #}
+  {% endblock %}
+</head>
+
+<body>
+
+  {% include 'part/header.html' %} {# 引入导航栏部分 #}
+  <div class="container-fluid">
+    <div class="row">
+      {% include 'part/sidebar.html' %} {# 引入侧边栏 #}
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 py-4">
+        {% block content %}
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+          <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        </div>
+        {% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script src="{% static 'js/jquery.slim.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/sweetalert.min.js' %}"></script>
+  {% include 'part/sweetalert.html' %}
+
+  {% if request.user.is_authenticated %}
+  <!-- 头像预览 Modal -->
+  <div class="modal fade" id="avatarModal" tabindex="-1" role="dialog" aria-labelledby="avatarModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="avatarModalLabel"><i class="fas fa-user-circle mr-2"></i>头像预览</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-center py-4">
+          <img src="/media/{{ request.user.userinfo.avatar }}" class="img-fluid rounded shadow-sm border" alt="头像预览"
+            style="max-height: 400px; object-fit: contain;">
+        </div>
+        <div class="modal-footer bg-light">
+          <a href="{% url 'authentication:upload_avatar' %}" class="btn btn-primary btn-sm"><i
+              class="fas fa-edit mr-1"></i>修改头像</a>
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">关闭</button>
+        </div>
       </div>
     </div>
+  </div>
+  {% endif %}
 
-    <script src='{% static 'js/jquery.slim.min.js'%}'></script>
-    <script src='{% static 'js/bootstrap.bundle.min.js'%}'></script>
-    <script src='{% static 'js/sweetalert.min.js'%}'></script>
-    {% include 'part/sweetalert.html' %}
-    {% block js %}
-    {% endblock %}
-  </body>
+  {% block js %}
+  {% endblock %}
+</body>
+
 </html>

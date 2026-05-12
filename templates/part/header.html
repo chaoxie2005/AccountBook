@@ -1,60 +1,85 @@
 <style>
-    .user-profile-area {
-        /* 为整个用户区域添加过渡效果，使其在内容变化时更平滑 */
-        display: flex;
-        align-items: center;
-    }
+  .navbar {
+    background: #fff !important;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 0.75rem 1.5rem;
+  }
 
-    .header-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
-        transition: all 0.3s cubic-bezier(.25,.8,.25,1); /* 使用更平滑的动画曲线 */
-    }
-    .user-profile-area a:hover .header-avatar {
-         /* 悬停时增加阴影并轻微上移，产生“浮起”效果 */
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 0 0 2px rgba(255, 255, 255, 0.6);
-    }
+  .navbar-brand {
+    color: #4e73df !important;
+    font-weight: 800;
+    letter-spacing: 0.05rem;
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
 
-    .username-link {
-        color: #e9ecef;
-        font-weight: 500;
-        text-decoration: none;
-        transition: color 0.3s ease;
-        /* 为文字添加轻微阴影，增加在深色背景下的可读性 */
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
- 
-    .username-link:hover {
-        color: #fff; /* 悬停时颜色变亮 */
-        text-decoration: none;
-    }
- 
-    .logout-link {
-        color: #adb5bd;
-        font-size: 0.9rem;
-        text-decoration: none;
-        transition: color 0.3s ease;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2
-    }
- 
-    .logout-link:hover {
-        color: #f8f9fa;
-        text-decoration: none;
-    }
+  .user-profile-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid #e3e6f0;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .header-avatar:hover {
+    transform: scale(1.1);
+    border-color: #4e73df;
+  }
+
+  .username-link {
+    color: #5a5c69;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+
+  .username-link:hover {
+    color: #4e73df;
+  }
+
+  .logout-btn {
+    background: #f8f9fc;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+    padding: 0.4rem 0.8rem;
+    color: #e74a3b;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+  }
+
+  .logout-btn:hover {
+    background: #e74a3b;
+    color: #fff;
+    border-color: #e74a3b;
+  }
 </style>
 
-<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-  <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">超凡账本</a>
-  <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-  <ul class="navbar-nav px-3">
-    {# 用户信息和退出按钮 #}
-    <div class="d-flex align-items-center px-3 user-profile-area">
-      <a href="#" class="mr-2"><img class="header-avatar" src="/media/{{ request.user.userinfo.avatar }}" alt="头像" /></a>
-      <a href="#" class="username-link mr-3">{{ request.user.username }}</a>
-      <a class="logout-link" href="{% url 'authentication:logout' %}">退出</a>
+<nav class="navbar navbar-expand navbar-light sticky-top shadow-sm">
+  <a class="navbar-brand" href="/">
+    <i class="fas fa-wallet mr-2"></i>超凡账本
+  </a>
+
+  <ul class="navbar-nav ml-auto">
+    <div class="user-profile-area">
+      <div class="d-none d-lg-inline text-gray-600 small mr-2">
+        <span class="username-link">{{ request.user.username }}</span>
+      </div>
+      <a href="javascript:void(0);" data-toggle="modal" data-target="#avatarModal" title="点击预览头像">
+        <img class="header-avatar" src="/media/{{ request.user.userinfo.avatar }}" alt="头像" />
+      </a>
+      <div class="topbar-divider d-none d-sm-block"
+        style="width: 0; border-right: 1px solid #e3e6f0; height: 2.5rem; margin: auto 1rem;"></div>
+      <a class="logout-btn" href="{% url 'authentication:logout' %}">
+        <i class="fas fa-sign-out-alt mr-1"></i>退出
+      </a>
     </div>
   </ul>
 </nav>

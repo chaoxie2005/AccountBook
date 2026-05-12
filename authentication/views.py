@@ -41,9 +41,17 @@ def register(request):
             user.save()
 
             # 发送邮件
+            current_site = get_current_site(request)
+            verify_url = request.build_absolute_uri(
+                resolve_url("authentication:verify_account", user.username)
+            )
             content = f"""
-            请点击下方链接，激活账号：
-            http://127.0.0.1:8000/authentication/verify_account/{user.username}/
+            您好 {user.username}，
+            
+            感谢注册超凡账本！请点击下方链接激活您的账号：
+            {verify_url}
+            
+            如果您没有注册此账号，请忽略此邮件。
             """
             t = Thread(
                 target=send_mail,

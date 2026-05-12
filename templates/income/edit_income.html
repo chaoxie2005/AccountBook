@@ -1,0 +1,157 @@
+{% extends 'superclass/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-8 col-lg-10">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+      <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-edit mr-2 text-success"></i>编辑收入</h1>
+      <a href="{% url 'income' %}" class="btn btn-sm btn-secondary shadow-sm">
+        <i class="fas fa-arrow-left fa-sm text-white-50 mr-1"></i> 返回列表
+      </a>
+    </div>
+
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-success">收入详情</h6>
+      </div>
+      <div class="card-body">
+        <form action="{% url 'edit_income' income.id %}" method="post">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="amountField" class="font-weight-bold">金额 (¥)</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text bg-light border-0"><i class="fas fa-yen-sign text-success"></i></span>
+                  </div>
+                  <input type="number" step="0.01" value="{{ values.amount }}" class="form-control bg-light border-0"
+                    name="amount" id="amountField" required />
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="categoryField" class="font-weight-bold">分类</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text bg-light border-0"><i class="fas fa-tag text-success"></i></span>
+                  </div>
+                  <select class="form-control bg-light border-0" name="category" id="categoryField" required>
+                    <option value="">请选择分类...</option>
+                    {% for item in categories %}
+                    <option value="{{ item.name }}" {% if item.name==values.category %}selected{% endif %}>{{ item.name
+                      }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div id="categoryHint" class="small text-muted mt-1"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="dateField" class="font-weight-bold">日期</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text bg-light border-0"><i
+                        class="fas fa-calendar-alt text-success"></i></span>
+                  </div>
+                  <input type="date" class="form-control bg-light border-0" name="date" id="dateField"
+                    value="{{ values.date|date:'Y-m-d' }}" required />
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="descriptionField" class="font-weight-bold">描述</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text bg-light border-0"><i class="fas fa-pen text-success"></i></span>
+                  </div>
+                  <input type="text" value="{{ values.description }}" class="form-control bg-light border-0"
+                    name="description" id="descriptionField" placeholder="简单描述一下这笔收入..." />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="text-right">
+            <button type="submit" class="btn btn-success px-5">
+              <i class="fas fa-save mr-2"></i> 保存修改
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+  (function () {
+    // 智能分类：当“分类”为空时，根据“描述”自动请求后端推荐分类
+    var desc = document.getElementById('descriptionField')
+    var cat = document.getElementById('categoryField')
+    var hint = document.getElementById('categoryHint')
+    if (!desc || !cat) return
+
+    // 用户是否手动操作过分类下拉框：手动选过就不再自动覆盖
+    var touched = false
+    // 防抖定时器：避免每次输入都请求接口
+    var timer = null
+
+    cat.addEventListener('change', function () {
+      touched = true
+      if (hint) hint.textContent = ''
+    })
+
+    function requestSuggest() {
+      // 1) 读取描述内容
+      var q = (desc.value || '').trim()
+      // 2) 描述太短不推荐
+      if (q.length < 2) {
+        if (hint) hint.textContent = ''
+        return
+      }
+
+      // 3) 分类已选择时不推荐（尊重用户当前选择）
+      if (cat.value) return
+
+      // 4) 请求后端推荐接口
+      fetch('/income/suggest-category/?q=' + encodeURIComponent(q))
+        .then(function (r) { return r.json() })
+        .then(function (data) {
+          // 用户已手动选择过分类，禁止自动覆盖
+          if (touched) return
+          // 没有推荐结果就清空提示
+          if (!data || !data.category) {
+            if (hint) hint.textContent = ''
+            return
+          }
+          // 只允许选中下拉框中存在的分类（后端也会做校验，这里再兜底）
+          var exists = Array.prototype.some.call(cat.options, function (o) { return o.value === data.category })
+          if (!exists) return
+          // 自动选中推荐分类并提示
+          cat.value = data.category
+          if (hint) hint.textContent = '已根据描述推荐分类：' + data.category
+        })
+        .catch(function () { })
+    }
+
+    desc.addEventListener('input', function () {
+      clearTimeout(timer)
+      // 输入停止一段时间后再请求，降低请求频率
+      timer = setTimeout(requestSuggest, 400)
+    })
+
+    // 离开输入框时也触发一次，保证粘贴/快速输入时也能推荐
+    desc.addEventListener('blur', requestSuggest)
+  })()
+</script>
+{% endblock %}

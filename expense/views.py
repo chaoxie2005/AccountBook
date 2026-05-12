@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Expense, Category
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpResponse, FileResponse, JsonResponse
 
 
@@ -21,10 +21,12 @@ def home(request):
     return redirect(to='expense')
 
 
+from accountbook.utils import get_paginated_queryset, export_to_csv, export_to_excel, export_to_pdf
+
+
 @login_required(login_url='authentication:login')
 def index(request):
     """支出界面首页"""
-    page = request.GET.get('page', '')
     keyword = request.GET.get('keyword', '') # 搜索关键字
 
     if not keyword:
@@ -37,13 +39,7 @@ def index(request):
             | Q(date__startswith=keyword),
         ).all().order_by('-date')
         
-    paginator = Paginator(expenses, 3)
-    try:
-        expenses = paginator.page(page)
-    except PageNotAnInteger as e:
-        expenses = paginator.page(1)
-    except EmptyPage as e:
-        expenses = paginator.page(paginator.num_pages)
+    expenses = get_paginated_queryset(expenses, request, per_page=3)
 
     context = {
         'expenses': expenses,
@@ -134,69 +130,123 @@ def delete_expense(request, expense_id):
     return HttpResponse('Ok')
 
 
+@login_required(login_url='authentication:login')
+def suggest_category(request):
+    """
+    智能分类：根据“描述”推荐最可能的支出分类。
+
+    返回格式：
+    - category: 推荐的分类名称（必须存在于 Category 表中，否则返回空字符串）
+    - confidence: 置信度（0~1，数值越大越可靠）
+    - source: 推荐来源（history | keyword | 空）
+    """
+    q = (request.GET.get("q") or "").strip()
+    # 输入太短时不做推荐，避免误判
+    if len(q) < 2:
+        return JsonResponse({"category": "", "confidence": 0, "source": ""})
+
+    # 仅允许返回“已有分类”，防止选中不存在的分类导致表单校验/展示异常
+    available_categories = set(Category.objects.values_list("name", flat=True))
+
+    def pick_from_history(text):
+        # 历史优先：从用户自己的历史支出记录中找“相似描述”的最常用分类
+        # n 越大，表示匹配的前缀越长，通常越准确
+        for n in (6, 4, 3, 2):
+            key = text[:n]
+            if len(key) < 2:
+                continue
+            rows = (
+                Expense.objects.filter(owner=request.user, description__icontains=key)
+                .values("category")
+                .annotate(cnt=Count("id"))
+                .order_by("-cnt")
+            )
+            for row in rows:
+                cat = row.get("category") or ""
+                if cat in available_categories:
+                    # 前缀越长，置信度给得越高
+                    confidence = 0.9 if n >= 4 else 0.8
+                    return cat, confidence
+        return "", 0
+
+    def pick_from_keywords(text):
+        # 关键词兜底：当历史匹配不到时，使用关键词规则做推荐
+        # 注意：不同人自定义的分类名称可能不同，所以用“候选分类列表”来兼容
+        keyword_rules = [
+            (
+                ("外卖", "早餐", "午餐", "晚餐", "餐", "奶茶", "咖啡", "饭", "火锅", "烧烤"),
+                ("餐饮", "饮食", "吃饭", "餐费", "食物", "食品"),
+            ),
+            (
+                ("地铁", "公交", "打车", "滴滴", "高铁", "火车", "机票", "停车", "油", "加油"),
+                ("交通", "出行", "通勤"),
+            ),
+            (
+                ("房租", "租房", "物业", "水费", "电费", "燃气", "宽带", "网费"),
+                ("居住", "房租", "生活缴费", "水电"),
+            ),
+            (
+                ("淘宝", "京东", "拼多多", "购物", "衣", "鞋", "包", "超市"),
+                ("购物", "日用", "生活用品", "超市"),
+            ),
+            (
+                ("药", "医院", "挂号", "体检", "医保", "牙", "口腔"),
+                ("医疗", "健康", "医药"),
+            ),
+            (
+                ("电影", "游戏", "KTV", "演出", "旅游", "景区", "酒店"),
+                ("娱乐", "旅行", "旅游"),
+            ),
+            (
+                ("书", "课程", "培训", "学习", "考试", "资料"),
+                ("学习", "教育", "培训"),
+            ),
+        ]
+
+        for keywords, candidates in keyword_rules:
+            if not any(kw in text for kw in keywords):
+                continue
+            for candidate in candidates:
+                if candidate in available_categories:
+                    return candidate, 0.7
+        return "", 0
+
+    # 1) 优先用历史匹配
+    category, confidence = pick_from_history(q)
+    if category:
+        return JsonResponse({"category": category, "confidence": confidence, "source": "history"})
+
+    # 2) 其次用关键词规则
+    category, confidence = pick_from_keywords(q)
+    if category:
+        return JsonResponse({"category": category, "confidence": confidence, "source": "keyword"})
+
+    # 3) 都匹配不到则不推荐
+    return JsonResponse({"category": "", "confidence": 0, "source": ""})
+
+
 def download_csv(request):
     """导出支出记录的csv文件"""
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="expenses.csv"'
-    # 设置 CSV 编码为 UTF-8 with BOM，防止 Excel 打开乱码
-    response.write("\ufeff".encode("utf8"))
-    writer = csv.writer(response)
-    writer.writerow(["金额", "类型", "描述", "日期"])
-    expense = Expense.objects.filter(owner=request.user).all()
-    for item in expense:
-        writer.writerow([item.amount, item.category, item.description, str(item.date)])
-    return response
+    expenses = Expense.objects.filter(owner=request.user).all()
+    headers = ["金额", "类型", "描述", "日期"]
+    data_func = lambda item: [item.amount, item.category, item.description, str(item.date)]
+    return export_to_csv(expenses, "expenses", headers, data_func)
 
 
 def download_excel(request):
     """导出支出记录的excel文件"""
-    bio = BytesIO()
-    # 创建一个新的Excel工作簿
-    workbook = openpyxl.Workbook()
-    # 获取活动工作表，默认是第一个工作表
-    sheet = workbook.active
-    # 写入表头
-    sheet.append(["金额", "类型", "描述", "日期"])
-    # 写入数据行
-    for item in Expense.objects.filter(owner=request.user).all():
-        sheet.append([item.amount, item.category, item.description, str(item.date)])
-    # 将工作簿保存到BytesIO对象中
-    workbook.save(bio)
-    bio.seek(0)  # 将指针移动到文件开头
-
-    response = HttpResponse(
-        bio.getvalue(),
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": 'attachment; filename="expense.xlsx"'},
-    )
-    return response
+    expenses = Expense.objects.filter(owner=request.user).all()
+    headers = ["金额", "类型", "描述", "日期"]
+    data_func = lambda item: [item.amount, item.category, item.description, str(item.date)]
+    return export_to_excel(expenses, "expense", headers, data_func)
 
 
 def download_pdf(request):
     """导出支出记录的PDF"""
-    bio = BytesIO()
-    pdf = canvas.Canvas(bio)
-    font_path = os.path.join(settings.STATICFILES_DIRS[0], "fonts", "msyh.ttc")
-    pdfmetrics.registerFont(TTFont("msyh", font_path))
-    pdf.setFont("msyh", 12)  # 设置字体和大小
-    pdf.drawString(100, 800, "金额")
-    pdf.drawString(200, 800, "类型")
-    pdf.drawString(300, 800, "描述")
-    pdf.drawString(400, 800, "日期")
-
-    y = 780
-    for item in Expense.objects.filter(owner=request.user).all():
-        pdf.drawString(100, y, str(item.amount))
-        pdf.drawString(200, y, item.category)
-        pdf.drawString(300, y, item.description)
-        pdf.drawString(400, y, str(item.date))
-        y -= 20
-
-    pdf.showPage()
-    pdf.save()
-    bio.seek(0)
-
-    return FileResponse(bio, as_attachment=True, filename="expense.pdf")
+    expenses = Expense.objects.filter(owner=request.user).all()
+    headers = ["金额", "类型", "描述", "日期"]
+    data_func = lambda item: [item.amount, item.category, item.description, str(item.date)]
+    return export_to_pdf(expenses, "expense", headers, data_func)
 
 
 def index_stats(request):

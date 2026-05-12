@@ -1,43 +1,117 @@
-{# 侧边栏部分 #}
-<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+<style>
+  .sidebar {
+    background-color: #4e73df;
+    background-image: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
+    background-size: cover;
+    min-height: 100vh;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  }
+
+  .sidebar .nav-item .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 700;
+    padding: 1rem;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .sidebar .nav-item .nav-link i {
+    font-size: 0.85rem;
+    margin-right: 0.75rem;
+    width: 1.5rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .sidebar .nav-item .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .sidebar .nav-item .nav-link.active {
+    color: #fff;
+  }
+
+  .sidebar .nav-item .nav-link.active i {
+    color: #fff;
+  }
+
+  .sidebar-heading {
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 800;
+    font-size: 0.65rem;
+    padding: 1.5rem 1rem 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1rem;
+  }
+
+  .sidebar-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin: 0 1rem 1rem;
+  }
+</style>
+
+<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
   <div class="sidebar-sticky pt-3">
-    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-      <span>首页</span>
-      <a class="d-flex align-items-center text-muted" href="#" aria-label="Add a new report"><span data-feather="plus-circle"></span></a>
-    </h6>
+
+    <div class="sidebar-heading">账单管理</div>
     <ul class="nav flex-column">
       <li class="nav-item">
-        <a class="nav-link {% if request.resolver_match.url_name == 'expense' %}active{% endif %}" href="{% url 'expense' %}">支出</a>
+        <a class="nav-link {% if request.resolver_match.url_name == 'expense' %}active{% endif %}"
+          href="{% url 'expense' %}">
+          <i class="fas fa-fw fa-minus-circle"></i>
+          <span>支出记录</span>
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">收入</a>
+        <a class="nav-link {% if request.resolver_match.url_name == 'income' %}active{% endif %}"
+          href="{% url 'income' %}">
+          <i class="fas fa-fw fa-plus-circle"></i>
+          <span>收入记录</span>
+        </a>
       </li>
     </ul>
 
-    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-      <span>汇总</span>
-      <a class="d-flex align-items-center text-muted" href="#" aria-label="Add a new report"><span data-feather="plus-circle"></span></a>
-    </h6>
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">统计分析</div>
     <ul class="nav flex-column">
       <li class="nav-item">
-        <a class="nav-link {% if request.resolver_match.url_name == 'expense_summary_stats' %}active{% endif %}" href="{% url 'expense_summary_stats' %}">支出汇总</a>
-      </li>
+        <a class="nav-link {% if request.resolver_match.url_name == 'expense_summary_stats' %}active{% endif %}"
+          href="{% url 'expense_summary_stats' %}">
+          <i class="fas fa-fw fa-chart-pie"></i>
+          <span>支出汇总</span>
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">收入汇总</a>
+        <a class="nav-link {% if request.resolver_match.url_name == 'income_summary_stats' %}active{% endif %}"
+          href="{% url 'income_summary_stats' %}">
+          <i class="fas fa-fw fa-chart-line"></i>
+          <span>收入汇总</span>
+        </a>
       </li>
     </ul>
 
-    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-      <span>设置</span>
-      <a class="d-flex align-items-center text-muted" href="#" aria-label="Add a new report"><span data-feather="plus-circle"></span></a>
-    </h6>
-    <ul class="nav flex-column">
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">个人设置</div>
+    <ul class="nav flex-column mb-4">
       <li class="nav-item">
-        <a class="nav-link {% if request.resolver_match.url_name == 'change_password' %}active{% endif %}" href="{% url 'authentication:change_password' %}">修改密码</a>
+        <a class="nav-link {% if request.resolver_match.url_name == 'change_password' %}active{% endif %}"
+          href="{% url 'authentication:change_password' %}">
+          <i class="fas fa-fw fa-key"></i>
+          <span>修改密码</span>
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link {% if request.resolver_match.url_name == 'upload_avatar' %}active{% endif %}" href="{% url 'authentication:upload_avatar' %}">上传头像</a>
+        <a class="nav-link {% if request.resolver_match.url_name == 'upload_avatar' %}active{% endif %}"
+          href="{% url 'authentication:upload_avatar' %}">
+          <i class="fas fa-fw fa-user-circle"></i>
+          <span>上传头像</span>
+        </a>
       </li>
     </ul>
   </div>

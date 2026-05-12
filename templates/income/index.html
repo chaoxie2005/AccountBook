@@ -1,0 +1,123 @@
+{% extends 'superclass/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-plus-circle mr-2 text-success"></i>收入管理</h1>
+  <div class="d-none d-sm-inline-block">
+    <a href="{% url 'download_income_csv' %}" class="btn btn-sm btn-outline-primary shadow-sm"><i
+        class="fas fa-file-csv fa-sm text-primary-50"></i> CSV</a>
+    <a href="{% url 'download_income_excel' %}" class="btn btn-sm btn-outline-success shadow-sm"><i
+        class="fas fa-file-excel fa-sm text-success-50"></i> Excel</a>
+    <a href="{% url 'download_income_pdf' %}" class="btn btn-sm btn-outline-danger shadow-sm"><i
+        class="fas fa-file-pdf fa-sm text-danger-50"></i> PDF</a>
+  </div>
+</div>
+
+{# 操作区 #}
+<div class="card shadow mb-4">
+  <div class="card-body">
+    <div class="row align-items-center">
+      <div class="col-md-4">
+        <a href="{% url 'add_income' %}" class="btn btn-success btn-icon-split">
+          <span class="icon text-white-50">
+            <i class="fas fa-plus"></i>
+          </span>
+          <span class="text">添加收入</span>
+        </a>
+      </div>
+      <div class="col-md-8">
+        <form method="get" class="form-inline float-right">
+          <div class="input-group">
+            <input type="text" name="keyword" class="form-control bg-light border-0 small" placeholder="搜索收入记录..."
+              value="{{ keyword }}" />
+            <div class="input-group-append">
+              <button class="btn btn-success" type="submit">
+                <i class="fas fa-search fa-sm"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# 表格区 #}
+<div class="card shadow mb-4">
+  <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+    <h6 class="m-0 font-weight-bold text-success">收入列表</h6>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>金额</th>
+            <th>分类</th>
+            <th>日期</th>
+            <th>描述</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for income in incomes %}
+          <tr>
+            <td class="font-weight-bold text-success">¥{{ income.amount }}</td>
+            <td><span class="badge badge-success">{{ income.category }}</span></td>
+            <td>{{ income.date|date:'Y-m-d' }}</td>
+            <td class="text-muted">{{ income.description|truncatechars:30 }}</td>
+            <td>
+              <a href="{% url 'edit_income' income.id %}" class="btn btn-sm btn-circle btn-outline-primary" title="编辑">
+                <i class="fas fa-edit"></i>
+              </a>
+              <button class="btn btn-sm btn-circle btn-outline-danger deleteBtn" incomeID="{{ income.id }}" title="删除">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-4 text-muted">暂无收入记录</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {# 分页导航 #}
+    <div class="mt-3">
+      {% include 'part/paginator.html' with page_obj=incomes %}
+    </div>
+  </div>
+</div>
+
+{# 图表区 #}
+<div class="row">
+  <div class="col-xl-6 col-lg-6">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-success">收入类型分布</h6>
+      </div>
+      <div class="card-body">
+        <div id="categoryStats" style="width: 100%;height: 350px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-6 col-lg-6">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-success">月度收入趋势</h6>
+      </div>
+      <div class="card-body">
+        <div id="dateStats" style="width: 100%;height: 350px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/income/delete_income.js' %}"></script>
+<script src="{% static 'js/echarts.min.js' %}"></script>
+<script src="{% static 'js/income/index_stats.js' %}"></script>
+{% endblock %}

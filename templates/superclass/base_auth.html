@@ -9,19 +9,54 @@
     {% load static %}
     <link rel="shortcut icon" href="{% static 'img/favicon.png' %}" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/authentication/base_auth.css' %}" />
-
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <style>
+      body {
+        background-color: #f4f7fc;
+        background-image: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        font-family: "Microsoft YaHei", sans-serif;
+      }
+      .auth-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 1rem 3rem rgba(0,0,0,0.175);
+        overflow: hidden;
+      }
+      .auth-header {
+        background: #fff;
+        padding: 2.5rem 2rem 1rem;
+        text-align: center;
+      }
+      .auth-body {
+        padding: 1rem 2.5rem 2.5rem;
+      }
+      .form-control {
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d3e2;
+      }
+      .btn-auth {
+        padding: 0.75rem;
+        font-weight: 700;
+        border-radius: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05rem;
+      }
+    </style>
     {% block style %} {# 自定义css #}
     {% endblock %}
   </head>
   <body>
-    <div class="container-fluid">
-      <div class="row">
-        <main role="main" class="col-md-6 col-10 col-lg-4 offset-md-3 offset-1 offset-lg-4">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-xl-5 col-lg-6 col-md-8">
            {% block content %}
-                写自己的表格
            {% endblock %}
-        </main>
+        </div>
       </div>
     </div>
 

@@ -1,0 +1,92 @@
+{% extends 'superclass/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-chart-line mr-2 text-success"></i>收入汇总分析</h1>
+</div>
+
+<div class="row">
+  {% for item in sum_stats_list %}
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-success shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">{{ item.title }}</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">¥{{ item.sum|stringformat:".2f" }}</div>
+            <div class="text-xs text-muted mt-1">共 {{ item.count }} 笔记录</div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-coins fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row">
+  <div class="col-xl-6 col-lg-6">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-success">收入构成 (今年)</h6>
+      </div>
+      <div class="card-body">
+        <div id="s1" style="height: 350px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-6 col-lg-6">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-success">各类别收入金额</h6>
+      </div>
+      <div class="card-body">
+        <div id="s2" style="height: 350px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xl-6 col-lg-6">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-success">每月收入趋势</h6>
+      </div>
+      <div class="card-body">
+        <div id="s3" style="height: 350px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-6 col-lg-6">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-success">年度累计收入走势</h6>
+      </div>
+      <div class="card-body">
+        <div id="s4" style="height: 350px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block style %}
+<style>
+  .border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+  }
+
+  .text-xs {
+    font-size: .7rem;
+  }
+</style>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/income/income_summary_stats.js' %}"></script>
+<script src="{% static 'js/echarts.min.js' %}"></script>
+{% endblock %}

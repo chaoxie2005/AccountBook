@@ -13,6 +13,8 @@ urlpatterns = [
     path("download_csv/", views.download_csv, name="download_csv"),  # 导出csv
     path("download_excel/", views.download_excel, name="download_excel"),  # 导出excel
     path("download_pdf/", views.download_pdf, name="download_pdf"),  # 导出PDF
+    # 智能分类：根据描述推荐分类（前端输入描述时调用）
+    path("suggest-category/", views.suggest_category, name="expense_suggest_category"),
     path("index_stats/", views.index_stats, name="index_stats"),
     path(
         "expense_summary_stats/",

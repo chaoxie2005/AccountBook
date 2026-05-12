@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from django.contrib import messages
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dd86jx06bzin&nlii^(jt6sc(g9u61k6#8zd0y7ue-0uo!)3p5'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = []
 
@@ -39,8 +40,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "expense",  # 支出模块
-    "authentication",  # 认证模块
+    "expense",
+    "income",
+    "authentication",
 ]
 
 MIDDLEWARE = [
@@ -51,7 +53,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "authentication.middlewares.IPRateLimitMiddleware",
+    # "authentication.middlewares.IPRateLimitMiddleware",
 ]
 
 ROOT_URLCONF = 'accountbook.urls'
@@ -138,10 +140,10 @@ MESSAGE_TAGS = {
 }
 
 # 邮件配置
-EMAIL_HOST = "smtp.qq.com"  # 用于发送电子邮件的主机
-EMAIL_PORT = 25  # 用于在.中定义的 SMTP 服务器的端口
-EMAIL_HOST_USER = "3320841884@qq.com"
-EMAIL_HOST_PASSWORD = "sovzhmryhrggchba"
-EMAIL_USE_TLS = True
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.qq.com')
+EMAIL_PORT = config('EMAIL_PORT', default=25, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

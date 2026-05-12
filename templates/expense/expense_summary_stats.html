@@ -2,54 +2,87 @@
 {% load static %}
 
 {% block content %}
-  <div class="container mt-4">
-    <div class="row">
-      {# 面包屑 #}
-      <div class="col-12">
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-              <a href="#">汇总</a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">支出汇总</li>
-          </ol>
-        </nav>
-      </div>
-    </div>
-    <div class="row">
-      {% for item in sum_stats_list %}
-        <div class="col-md-3">
-          <div class="card mb-3">
-            <div class="card-header bg-primary text-white">
-              <h2>{{ item.title }}</h2>
-            </div>
-            <div class="card-body border border-primary">
-              <h5 class="card-title">支出 <span class="text-danger">{{ item.count }}</span> 笔</h5>
-              <p class="card-text">
-                支出总额：<span class="text-danger font-weight-bold">¥{{ item.sum }}</span>
-              </p>
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-chart-pie mr-2 text-primary"></i>支出汇总分析</h1>
+  </div>
+
+  <div class="row">
+    {% for item in sum_stats_list %}
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{ item.title }}</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">¥{{ item.sum|stringformat:".2f" }}</div>
+                <div class="text-xs text-muted mt-1">共 {{ item.count }} 笔记录</div>
+              </div>
+              <div class="col-auto">
+                <i class="fas fa-calendar fa-2x text-gray-300"></i>
+              </div>
             </div>
           </div>
         </div>
-      {% endfor %}
-    </div>
-
-    <div class="d-flex justify-content-around flex-wrap">
-      <div class="card" style="width: 400px;height:400px;margin-bottom: 10px;">
-        <div class="card-body" id="s1"></div>
       </div>
-      <div class="card" style="width: 400px;height:400px;margin-bottom: 10px;">
-        <div class="card-body" id="s2"></div>
-      </div>
-      <div class="card" style="width: 400px;height:400px;margin-bottom: 10px;">
-        <div class="card-body" id="s3"></div>
-      </div>
-      <div class="card" style="width: 400px;height:400px;margin-bottom: 10px;">
-        <div class="card-body" id="s4"></div>
-      </div>
-    </div>
-
+    {% endfor %}
   </div>
+
+  <div class="row">
+    <div class="col-xl-6 col-lg-6">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">支出构成 (今年)</h6>
+        </div>
+        <div class="card-body">
+          <div id="s1" style="height: 350px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6 col-lg-6">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">各类别支出金额</h6>
+        </div>
+        <div class="card-body">
+          <div id="s2" style="height: 350px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xl-6 col-lg-6">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">每月支出趋势</h6>
+        </div>
+        <div class="card-body">
+          <div id="s3" style="height: 350px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6 col-lg-6">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">年度累计支出走势</h6>
+        </div>
+        <div class="card-body">
+          <div id="s4" style="height: 350px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block style %}
+<style>
+  .border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+  }
+  .text-xs {
+    font-size: .7rem;
+  }
+</style>
 {% endblock %}
 
 {% block js %}

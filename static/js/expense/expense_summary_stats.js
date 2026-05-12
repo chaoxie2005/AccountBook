@@ -1,209 +1,128 @@
 function expensetypePie(title, data) {
     var myChart = echarts.init(document.getElementById('s1'));
     var option = {
-        title: {
-            text: title,
-        },
-        tooltip: {
-            trigger: 'item'
-        },
-        legend: {
-            bottom: '5%',
-            left: 'center'
-        },
-        series: [
-            {
-                name: 'Access From',
-                type: 'pie',
-                radius: ['40%', '70%'],
-                avoidLabelOverlap: false,
-                itemStyle: {
-                    borderRadius: 10,
-                    borderColor: '#fff',
-                    borderWidth: 2
-                },
-                label: {
-                    show: false,
-                    position: 'center'
-                },
-                emphasis: {
-                    label: {
-                        show: true,
-                        fontSize: 40,
-                        fontWeight: 'bold'
-                    }
-                },
-                labelLine: {
-                    show: false
-                },
-                data: data,
-            }
-        ]
+        tooltip: { trigger: 'item', formatter: '{b}: ¥{c} ({d}%)' },
+        legend: { bottom: '0', left: 'center', textStyle: { color: '#858796' } },
+        series: [{
+            name: '支出分类',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+            label: { show: false, position: 'center' },
+            emphasis: { label: { show: true, fontSize: '18', fontWeight: 'bold' } },
+            labelLine: { show: false },
+            data: data,
+            color: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796']
+        }]
     };
-    // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
+    window.addEventListener('resize', () => myChart.resize());
 }
 
 function expensetypeBar(title, data) {
     var myChart = echarts.init(document.getElementById('s2'));
     var option = {
-        title: {
-            text: title
-        },
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-                type: 'shadow'
-            }
-        },
-        grid: {
-            left: '10%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true
-        },
-        xAxis: [
-            {
-                type: 'category',
-                data: data.captions,
-                axisTick: {
-                    alignWithLabel: true
-                }
-            }
-        ],
-        yAxis: [
-            {
-                type: 'value'
-            }
-        ],
-        series: [
-            {
-                name: 'Direct',
-                type: 'bar',
-                barWidth: '60%',
-                data: data.values,
-            }
-        ]
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: [{ 
+            type: 'category', 
+            data: data.captions, 
+            axisTick: { alignWithLabel: true },
+            axisLine: { lineStyle: { color: '#e3e6f0' } },
+            axisLabel: { color: '#858796' }
+        }],
+        yAxis: [{ 
+            type: 'value',
+            splitLine: { lineStyle: { color: '#e3e6f0', type: 'dashed' } },
+            axisLabel: { color: '#858796' }
+        }],
+        series: [{
+            name: '支出金额',
+            type: 'bar',
+            barWidth: '60%',
+            data: data.values,
+            itemStyle: { color: '#4e73df', borderRadius: [4, 4, 0, 0] }
+        }]
     };
-    // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
+    window.addEventListener('resize', () => myChart.resize());
 }
-
 
 function monthlyexpense(title, data) {
     var myChart = echarts.init(document.getElementById('s3'));
     const option = {
-        title: {
-            text: title
-        },
-        grid: {
-            left: '15%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true
-        },
-        xAxis: {
-            type: 'category',
+        tooltip: { trigger: 'axis' },
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: { 
+            type: 'category', 
             data: data.captions,
+            axisLine: { lineStyle: { color: '#e3e6f0' } },
+            axisLabel: { color: '#858796' }
         },
-        yAxis: {
-            type: 'value'
+        yAxis: { 
+            type: 'value',
+            splitLine: { lineStyle: { color: '#e3e6f0', type: 'dashed' } },
+            axisLabel: { color: '#858796' }
         },
-        series: [
-            {
-                data: data.values,
-                type: 'bar'
+        series: [{
+            data: data.values,
+            type: 'line',
+            smooth: true,
+            lineStyle: { color: '#4e73df', width: 3 },
+            itemStyle: { color: '#4e73df' },
+            areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: 'rgba(78, 115, 223, 0.3)' },
+                    { offset: 1, color: 'rgba(78, 115, 223, 0)' }
+                ])
             }
-        ]
+        }]
     };
-    // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
+    window.addEventListener('resize', () => myChart.resize());
 }
 
-function Annualcumulativexpenditure(title, data) {
+function yearlyexpense(title, data) {
     var myChart = echarts.init(document.getElementById('s4'));
     const option = {
-        title: {
-            text: title
+        tooltip: { trigger: 'axis' },
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: { 
+            type: 'category', 
+            data: data.captions,
+            axisLine: { lineStyle: { color: '#e3e6f0' } },
+            axisLabel: { color: '#858796' }
         },
-        tooltip: {
-            trigger: 'axis'
+        yAxis: { 
+            type: 'value',
+            splitLine: { lineStyle: { color: '#e3e6f0', type: 'dashed' } },
+            axisLabel: { color: '#858796' }
         },
-        legend: {
-            data: ['今年', '去年'],
-            right: '10%'
-        },
-        grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true
-        },
-        toolbox: {
-            feature: {
-                saveAsImage: {}
-            }
-        },
-        xAxis: {
-            type: 'category',
-            boundaryGap: false,
-            data: data.month,
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [
-            {
-                name: '今年',
-                type: 'line',
-                data: data.this_year_values,
-                smooth: true
-            },
-            {
-                name: '去年',
-                type: 'line',
-                data: data.last_year_values,
-                smooth: true
-            }
-        ]
+        series: [{
+            data: data.values,
+            type: 'line',
+            step: 'start',
+            lineStyle: { color: '#1cc88a', width: 3 },
+            itemStyle: { color: '#1cc88a' }
+        }]
     };
-    // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
+    window.addEventListener('resize', () => myChart.resize());
 }
 
-function getDataSetEcharts() {
-    fetch('/expense/expense_s1/').then(res => res.json()).then((data) => {
-        expensetypePie('支出类型【今年】', data);
-    });
-    fetch('/expense/expense_s2/').then(res => res.json()).then((data) => {
-        expensetypeBar('支出类型【今年】', data);
-    });
-    fetch('/expense/expense_s3/').then(res => res.json()).then((data) => {
-        values = data.values;
-        mvi = data.max_value_index
-        values[mvi] = {
-            value: values[mvi],
-            itemStyle: { color: '#a90000' }
-        }
-        newData = {
-            captions: data.captions,
-            values: values
-        }
-        monthlyexpense('每月支出【今年】', newData);
-    });
+fetch('/expense/expense_s1/')
+    .then(response => response.json())
+    .then(data => expensetypePie('支出分类占比', data));
 
-    const currentDate = new Date();
-    const thisYear = currentDate.getFullYear()
-    fetch(`/expense/expense_s4/${thisYear}`).then((res) => res.json()).then((data) => {
-        let s4_data = {}
-        s4_data.month = data.captions;
-        s4_data.this_year_values = data.values;
-        fetch(`/expense/expense_s4/${thisYear - 1}`).then((res) => res.json()).then((data) => {
-            s4_data.last_year_values = data.values;
-            console.log(s4_data);
-            Annualcumulativexpenditure('年度累计支出', s4_data)
-        })
-    })
-}
+fetch('/expense/expense_s2/')
+    .then(response => response.json())
+    .then(data => expensetypeBar('支出金额分布', data));
 
-document.onload = getDataSetEcharts()
+fetch('/expense/expense_s3/')
+    .then(response => response.json())
+    .then(data => monthlyexpense('每月支出趋势', data));
+
+fetch(`/expense/expense_s4/${new Date().getFullYear()}/`)
+    .then(response => response.json())
+    .then(data => yearlyexpense('年度累计支出', data));

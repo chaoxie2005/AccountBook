@@ -1,56 +1,112 @@
 {% extends 'superclass/base_auth.html' %}
 
 {% block style %}
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/authentication/register.css' %}">
-{%  endblock %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/authentication/register.css' %}">
+{% endblock %}
 
 {% block content %}
-  <div class="card shadow-lg">
-    <div class="card-body">
-      <h5 class="card-title text-center py-3">注册</h5>
-      <form action="{% url 'authentication:register' %}" method="post">
-        {% csrf_token %}
-        <div class="form-group inPutZone">
-          <img src="{% static 'img/authentication/account.svg' %}">
-          <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" name="username" placeholder="用户名" id="username" autocomplete="off" value="{{ values.username }}"/>
-          <span class="invalid-feedback">{{ form.username.errors }}</span>
-          
-        </div>
-        <div class="form-group inPutZone">
-          <img src="{% static 'img/authentication/email.svg' %}">
-          <input type="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" name="email" placeholder="请输入您的邮箱" id="email" autocomplete="off" value="{{ values.email }}"/>
-          <span class="invalid-feedback">{{ form.email.errors }}</span>
-          
-          
-        </div>
-        <div class="form-group inPutZone">
-          <img src="{% static 'img/authentication/lock.svg' %}">
-          <input type="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" name="password" placeholder="密码" id="password" autocomplete="off" value="{{ values.password }}" />
-          {% if form.password.errors %}
-              <span class="invalid-feedback">{{ form.password.errors }}</span>
-          {% endif %}
-         
-        </div>
-        <div class="form-group inPutZone">
-          <img src="{% static 'img/authentication/lock.svg' %}">
-          <input type="password" class="form-control {% if form.re_password.errors %}is-invalid{% endif %}" name="re_password" placeholder="确认密码" id="re_password" autocomplete="off" value="{{ values.re_password }}"/>
-          <div class="invalid-feedback"></div>
-          {% if form.re_password.errors %}
-             <span class="invalid-feedback">{{ form.re_password.errors }}</span>
-          {% endif %}
-          
-        </div>
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">注册</button>
-        </div>
-        <p id="privacy">注册即表示同意遵守 <a href="">用户协议</a> 与 <a href="">隐私政策</a></p>
-        <p id='gotologin'>已有账户, <a href="{% url 'authentication:login' %}">立即登录</a></p>
-      </form>
-    </div>
+<div class="card auth-card shadow">
+  <div class="auth-header">
+    <h3 class="font-weight-bold text-primary mb-0"><i class="fas fa-user-plus mr-2"></i>注册</h3>
+    <p class="text-muted small mt-2">创建您的个人账本账户</p>
   </div>
+  <div class="auth-body">
+    <form action="{% url 'authentication:register' %}" method="post">
+      {% csrf_token %}
+      {% include "part/messages.html" %}
+
+      <div class="form-group">
+        <label class="small font-weight-bold text-dark">用户名</label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text bg-light border-right-0"><i class="fas fa-user text-gray-400"></i></span>
+          </div>
+          <input type="text"
+            class="form-control bg-light border-left-0 {% if form.username.errors %}is-invalid{% endif %}"
+            name="username" placeholder="请输入用户名" id="username" autocomplete="off" value="{{ values.username }}" />
+          {% if form.username.errors %}
+          <div class="invalid-feedback">{{ form.username.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="small font-weight-bold text-dark">电子邮箱</label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text bg-light border-right-0"><i class="fas fa-envelope text-gray-400"></i></span>
+          </div>
+          <input type="email"
+            class="form-control bg-light border-left-0 {% if form.email.errors %}is-invalid{% endif %}" name="email"
+            placeholder="请输入邮箱" id="email" autocomplete="off" value="{{ values.email }}" />
+          {% if form.email.errors %}
+          <div class="invalid-feedback">{{ form.email.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="small font-weight-bold text-dark">设置密码</label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text bg-light border-right-0"><i class="fas fa-lock text-gray-400"></i></span>
+          </div>
+          <input type="password"
+            class="form-control bg-light border-left-0 {% if form.password.errors %}is-invalid{% endif %}"
+            name="password" placeholder="请输入密码" id="password" autocomplete="off" value="{{ values.password }}" />
+          <div class="input-group-append">
+            <span class="input-group-text bg-light border-left-0" style="cursor: pointer;" id="toggle-password">
+              <i class="fas fa-eye text-gray-400" id="password-icon"></i>
+            </span>
+          </div>
+          {% if form.password.errors %}
+          <div class="invalid-feedback">{{ form.password.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="small font-weight-bold text-dark">确认密码</label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text bg-light border-right-0"><i
+                class="fas fa-shield-alt text-gray-400"></i></span>
+          </div>
+          <input type="password"
+            class="form-control bg-light border-left-0 {% if form.re_password.errors %}is-invalid{% endif %}"
+            name="re_password" placeholder="请再次输入密码" id="re_password" autocomplete="off"
+            value="{{ values.re_password }}" />
+          <div class="input-group-append">
+            <span class="input-group-text bg-light border-left-0" style="cursor: pointer;" id="toggle-re-password">
+              <i class="fas fa-eye text-gray-400" id="re-password-icon"></i>
+            </span>
+          </div>
+          {% if form.re_password.errors %}
+          <div class="invalid-feedback">{{ form.re_password.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-auth mt-4">
+        <i class="fas fa-user-check mr-2"></i> 立即注册
+      </button>
+
+      <p class="text-center text-muted small mt-3">
+        注册即表示同意遵守 <a href="#" class="text-primary">用户协议</a>
+      </p>
+
+      <hr class="my-4">
+
+      <div class="text-center small">
+        <span>已有账户?</span>
+        <a href="{% url 'authentication:login' %}" class="text-primary font-weight-bold ml-1">立即登录</a>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/authentication/register.js' %}"></script>
-{% endblock  %}
+<script src="{% static 'js/authentication/register.js' %}"></script>
+{% endblock %}

@@ -1,17 +1,41 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.core.cache import cache
-from django.http.response import HttpResponseForbidden
+from django.http import HttpResponseForbidden
 
-from .utils import get_client_ip
+
+def get_client_ip(request):
+    try:
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(",")[0].strip()
+        else:
+            ip = request.META.get("REMOTE_ADDR", "127.0.0.1")
+        return ip
+    except:
+        return "127.0.0.1"
 
 
 class IPRateLimitMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        ip = get_client_ip(request)
-        key = f"ip_rate_limit_{ip}"
-        count = cache.get(key, 0)
+        try:
+            # 不限制静态文件和后台
+            if request.path.startswith("/static/") or request.path.startswith(
+                "/media/"
+            ):
+                return None
+            if request.path.startswith("/admin/"):
+                return None
 
-        if count >= 30:
-            return HttpResponseForbidden("访问过于频繁，请稍后再试")
+            ip = get_client_ip(request)
+            key = f"ip_limit:{ip}"
 
-        cache.set(key, count + 1, 200)  # 一分钟内最多访问1000次
+            count = cache.get(key, 0)
+            if count >= 30:
+                return HttpResponseForbidden("访问过于频繁")
+
+            cache.set(key, count + 1, 100)
+            return None
+
+        except Exception as e:
+            # 出错也直接放行，绝对不报错
+            return None
